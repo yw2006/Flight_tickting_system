@@ -144,7 +144,7 @@ int count = Integer.parseInt((String) passengerComboBox.getSelectedItem());
     //         button.setForeground(FlightBookingApp.TEXT_COLOR);
     //     }
         
-    //     button.addActionListener(e -> {
+    //     button.addActionListener(_ -> {
     //         if (button.isSelected()) {
     //             button.setBackground(FlightBookingApp.PRIMARY_COLOR);
     //             button.setForeground(FlightBookingApp.WHITE);

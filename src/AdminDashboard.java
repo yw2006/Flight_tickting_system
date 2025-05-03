@@ -149,11 +149,11 @@ public class AdminDashboard extends JFrame {
     }
     
     private void addActionListeners() {
-        flightsBtn.addActionListener(e -> cardLayout.show(cardPanel, "flights"));
-        airportsBtn.addActionListener(e -> cardLayout.show(cardPanel, "airports"));
-        airlinesBtn.addActionListener(e -> cardLayout.show(cardPanel, "airlines"));
-        aircraftBtn.addActionListener(e -> cardLayout.show(cardPanel, "aircraft"));
-        customersBtn.addActionListener(e -> cardLayout.show(cardPanel, "customers"));
+        flightsBtn.addActionListener(_ -> cardLayout.show(cardPanel, "flights"));
+        airportsBtn.addActionListener(_ -> cardLayout.show(cardPanel, "airports"));
+        airlinesBtn.addActionListener(_ -> cardLayout.show(cardPanel, "airlines"));
+        aircraftBtn.addActionListener(_ -> cardLayout.show(cardPanel, "aircraft"));
+        customersBtn.addActionListener(_ -> cardLayout.show(cardPanel, "customers"));
     }
     
     private void initializeTableModels() {
@@ -206,7 +206,7 @@ public class AdminDashboard extends JFrame {
         // Header panel with title and add button
         JPanel headerPanel = createHeaderPanel("Active Flights");
         JButton addFlightBtn = new JButton("Add Flight");
-        addFlightBtn.addActionListener(e -> showAddFlightDialog());
+        addFlightBtn.addActionListener(_ -> showAddFlightDialog());
         headerPanel.add(addFlightBtn);
         
         // Create table panel with scroll pane
@@ -219,10 +219,10 @@ public class AdminDashboard extends JFrame {
         JButton scheduleBtn = new JButton("Manage Schedule");
         JButton seatsBtn = new JButton("Manage Seats");
         
-        editBtn.addActionListener(e -> editSelectedFlight());
-        deleteBtn.addActionListener(e -> deleteSelectedFlight());
-        scheduleBtn.addActionListener(e -> manageFlightSchedule());
-        seatsBtn.addActionListener(e -> manageFlightSeats());
+        editBtn.addActionListener(_ -> editSelectedFlight());
+        deleteBtn.addActionListener(_ -> deleteSelectedFlight());
+        scheduleBtn.addActionListener(_ -> manageFlightSchedule());
+        seatsBtn.addActionListener(_ -> manageFlightSeats());
         
         actionPanel.add(editBtn);
         actionPanel.add(deleteBtn);
@@ -245,7 +245,7 @@ public class AdminDashboard extends JFrame {
         // Header panel with title and add button
         JPanel headerPanel = createHeaderPanel("Airports");
         JButton addAirportBtn = new JButton("Add Airport");
-        addAirportBtn.addActionListener(e -> showAddAirportDialog());
+        addAirportBtn.addActionListener(_ -> showAddAirportDialog());
         headerPanel.add(addAirportBtn);
         
         // Create table panel with scroll pane
@@ -256,8 +256,8 @@ public class AdminDashboard extends JFrame {
         JButton editBtn = new JButton("Edit Selected");
         JButton deleteBtn = new JButton("Delete Selected");
         
-        editBtn.addActionListener(e -> editSelectedAirport());
-        deleteBtn.addActionListener(e -> deleteSelectedAirport());
+        editBtn.addActionListener(_ -> editSelectedAirport());
+        deleteBtn.addActionListener(_ -> deleteSelectedAirport());
         
         actionPanel.add(editBtn);
         actionPanel.add(deleteBtn);
@@ -278,7 +278,7 @@ public class AdminDashboard extends JFrame {
         // Header panel with title and add button
         JPanel headerPanel = createHeaderPanel("Airlines");
         JButton addAirlineBtn = new JButton("Add Airline");
-        addAirlineBtn.addActionListener(e -> showAddAirlineDialog());
+        addAirlineBtn.addActionListener(_ -> showAddAirlineDialog());
         headerPanel.add(addAirlineBtn);
         
         // Create table panel with scroll pane
@@ -289,8 +289,8 @@ public class AdminDashboard extends JFrame {
         JButton editBtn = new JButton("Edit Selected");
         JButton deleteBtn = new JButton("Delete Selected");
         
-        editBtn.addActionListener(e -> editSelectedAirline());
-        deleteBtn.addActionListener(e -> deleteSelectedAirline());
+        editBtn.addActionListener(_ -> editSelectedAirline());
+        deleteBtn.addActionListener(_ -> deleteSelectedAirline());
         
         actionPanel.add(editBtn);
         actionPanel.add(deleteBtn);
@@ -311,7 +311,7 @@ public class AdminDashboard extends JFrame {
         // Header panel with title and add button
         JPanel headerPanel = createHeaderPanel("Aircraft");
         JButton addAircraftBtn = new JButton("Add Aircraft");
-        addAircraftBtn.addActionListener(e -> showAddAircraftDialog());
+        addAircraftBtn.addActionListener(_ -> showAddAircraftDialog());
         headerPanel.add(addAircraftBtn);
         
         // Create table panel with scroll pane
@@ -322,8 +322,8 @@ public class AdminDashboard extends JFrame {
         JButton editBtn = new JButton("Edit Selected");
         JButton deleteBtn = new JButton("Delete Selected");
         
-        editBtn.addActionListener(e -> editSelectedAircraft());
-        deleteBtn.addActionListener(e -> deleteSelectedAircraft());
+        editBtn.addActionListener(_ -> editSelectedAircraft());
+        deleteBtn.addActionListener(_ -> deleteSelectedAircraft());
         
         actionPanel.add(editBtn);
         actionPanel.add(deleteBtn);
@@ -358,9 +358,9 @@ public class AdminDashboard extends JFrame {
         JButton blacklistBtn = new JButton("Blacklist Selected");
         JButton activateBtn = new JButton("Activate Selected");
         
-        blockBtn.addActionListener(e -> blockSelectedCustomer());
-        blacklistBtn.addActionListener(e -> blacklistSelectedCustomer());
-        activateBtn.addActionListener(e -> activateSelectedCustomer());
+        blockBtn.addActionListener(_ -> blockSelectedCustomer());
+        blacklistBtn.addActionListener(_ -> blacklistSelectedCustomer());
+        activateBtn.addActionListener(_ -> activateSelectedCustomer());
         
         actionPanel.add(blockBtn);
         actionPanel.add(blacklistBtn);
@@ -421,7 +421,7 @@ public class AdminDashboard extends JFrame {
         panel.add(timeField);
         
         JButton saveButton = new JButton("Save");
-        saveButton.addActionListener(e -> {
+        saveButton.addActionListener(_ -> {
             flightsModel.addRow(new Object[]{
                 flightNumberField.getText(),
                 departureField.getText(),
@@ -435,7 +435,7 @@ public class AdminDashboard extends JFrame {
         });
         
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(e -> dialog.dispose());
+        cancelButton.addActionListener(_ -> dialog.dispose());
         
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.add(saveButton);
@@ -488,7 +488,7 @@ public class AdminDashboard extends JFrame {
             panel.add(timeField);
             
             JButton saveButton = new JButton("Save");
-            saveButton.addActionListener(e -> {
+            saveButton.addActionListener(_ -> {
                 flightsModel.setValueAt(flightNumberField.getText(), selectedRow, 0);
                 flightsModel.setValueAt(departureField.getText(), selectedRow, 1);
                 flightsModel.setValueAt(arrivalField.getText(), selectedRow, 2);
@@ -500,7 +500,7 @@ public class AdminDashboard extends JFrame {
             });
             
             JButton cancelButton = new JButton("Cancel");
-            cancelButton.addActionListener(e -> dialog.dispose());
+            cancelButton.addActionListener(_ -> dialog.dispose());
             
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             buttonPanel.add(saveButton);
@@ -585,7 +585,7 @@ public class AdminDashboard extends JFrame {
             tabs.addTab("Custom Schedule", customPanel);
             
             // Add action listeners
-            addWeeklyBtn.addActionListener(e -> {
+            addWeeklyBtn.addActionListener(_ -> {
                 // Show dialog to add weekly schedule
                 JDialog addDialog = new JDialog(dialog, "Add Weekly Schedule", true);
                 addDialog.setSize(300, 150);
@@ -626,14 +626,14 @@ public class AdminDashboard extends JFrame {
                 addDialog.setVisible(true);
             });
             
-            removeWeeklyBtn.addActionListener(e -> {
+            removeWeeklyBtn.addActionListener(_ -> {
                 int row = weeklyTable.getSelectedRow();
                 if (row != -1) {
                     weeklyModel.removeRow(row);
                 }
             });
             
-            addCustomBtn.addActionListener(e -> {
+            addCustomBtn.addActionListener(_ -> {
                 // Show dialog to add custom schedule
                 JDialog addDialog = new JDialog(dialog, "Add Custom Schedule", true);
                 addDialog.setSize(300, 150);
@@ -673,7 +673,7 @@ public class AdminDashboard extends JFrame {
                 addDialog.setVisible(true);
             });
             
-            removeCustomBtn.addActionListener(e -> {
+            removeCustomBtn.addActionListener(_ -> {
                 int row = customTable.getSelectedRow();
                 if (row != -1) {
                     customModel.removeRow(row);
@@ -685,7 +685,7 @@ public class AdminDashboard extends JFrame {
             
             // Close button
             JButton closeButton = new JButton("Close");
-            closeButton.addActionListener(e -> dialog.dispose());
+            closeButton.addActionListener(_ -> dialog.dispose());
             
             JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             bottomPanel.add(closeButton);
@@ -733,7 +733,7 @@ public class AdminDashboard extends JFrame {
             actionPanel.add(deleteBtn);
             
             // Add button actions
-            addBtn.addActionListener(e -> {
+            addBtn.addActionListener(_ -> {
                 JDialog addDialog = new JDialog(dialog, "Add Seat", true);
                 addDialog.setSize(350, 250);
                 addDialog.setLocationRelativeTo(dialog);
@@ -786,7 +786,7 @@ public class AdminDashboard extends JFrame {
                 addDialog.setVisible(true);
             });
             
-            editBtn.addActionListener(e -> {
+            editBtn.addActionListener(_ -> {
                 int row = seatTable.getSelectedRow();
                 if (row != -1) {
                     JDialog editDialog = new JDialog(dialog, "Edit Seat", true);
@@ -849,7 +849,7 @@ public class AdminDashboard extends JFrame {
                 }
             });
             
-            deleteBtn.addActionListener(e -> {
+            deleteBtn.addActionListener(_ -> {
                 int row = seatTable.getSelectedRow();
                 if (row != -1) {
                     int confirm = JOptionPane.showConfirmDialog(dialog, 
@@ -893,7 +893,7 @@ public class AdminDashboard extends JFrame {
             
             // Close button
             JButton closeButton = new JButton("Close");
-            closeButton.addActionListener(e -> dialog.dispose());
+            closeButton.addActionListener(_ -> dialog.dispose());
             
             JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             bottomPanel.add(closeButton);
@@ -935,7 +935,7 @@ public class AdminDashboard extends JFrame {
         panel.add(countryField);
         
         JButton saveButton = new JButton("Save");
-        saveButton.addActionListener(e -> {
+        saveButton.addActionListener(_ -> {
             airportsModel.addRow(new Object[]{
                 codeField.getText(),
                 nameField.getText(),
@@ -947,7 +947,7 @@ public class AdminDashboard extends JFrame {
         });
         
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(e -> dialog.dispose());
+        cancelButton.addActionListener(_ -> dialog.dispose());
         
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.add(saveButton);
@@ -990,7 +990,7 @@ public class AdminDashboard extends JFrame {
             panel.add(countryField);
             
             JButton saveButton = new JButton("Save");
-            saveButton.addActionListener(e -> {
+            saveButton.addActionListener(_ -> {
                 airportsModel.setValueAt(codeField.getText(), selectedRow, 0);
                 airportsModel.setValueAt(nameField.getText(), selectedRow, 1);
                 airportsModel.setValueAt(cityField.getText(), selectedRow, 2);
@@ -1000,7 +1000,7 @@ public class AdminDashboard extends JFrame {
             });
             
             JButton cancelButton = new JButton("Cancel");
-            cancelButton.addActionListener(e -> dialog.dispose());
+            cancelButton.addActionListener(_ -> dialog.dispose());
             
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             buttonPanel.add(saveButton);
@@ -1052,7 +1052,7 @@ public class AdminDashboard extends JFrame {
         panel.add(hqField);
         
         JButton saveButton = new JButton("Save");
-        saveButton.addActionListener(e -> {
+        saveButton.addActionListener(_ -> {
             airlinesModel.addRow(new Object[]{
                 codeField.getText(),
                 nameField.getText(),
@@ -1062,7 +1062,7 @@ public class AdminDashboard extends JFrame {
         });
         
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(e -> dialog.dispose());
+        cancelButton.addActionListener(_ -> dialog.dispose());
         
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.add(saveButton);
@@ -1097,7 +1097,7 @@ public class AdminDashboard extends JFrame {
             panel.add(hqField);
             
             JButton saveButton = new JButton("Save");
-            saveButton.addActionListener(e -> {
+            saveButton.addActionListener(_ -> {
                 airlinesModel.setValueAt(codeField.getText(), selectedRow, 0);
                 airlinesModel.setValueAt(nameField.getText(), selectedRow, 1);
                 airlinesModel.setValueAt(hqField.getText(), selectedRow, 2);
@@ -1105,7 +1105,7 @@ public class AdminDashboard extends JFrame {
             });
             
             JButton cancelButton = new JButton("Cancel");
-            cancelButton.addActionListener(e -> dialog.dispose());
+            cancelButton.addActionListener(_ -> dialog.dispose());
             
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             buttonPanel.add(saveButton);
@@ -1161,7 +1161,7 @@ public class AdminDashboard extends JFrame {
         panel.add(capacityField);
         
         JButton saveButton = new JButton("Save");
-        saveButton.addActionListener(e -> {
+        saveButton.addActionListener(_ -> {
             aircraftModel.addRow(new Object[]{
                 nameField.getText(),
                 modelField.getText(),
@@ -1172,7 +1172,7 @@ public class AdminDashboard extends JFrame {
         });
         
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(e -> dialog.dispose());
+        cancelButton.addActionListener(_ -> dialog.dispose());
         
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.add(saveButton);
@@ -1211,7 +1211,7 @@ public class AdminDashboard extends JFrame {
             panel.add(capacityField);
             
             JButton saveButton = new JButton("Save");
-            saveButton.addActionListener(e -> {
+            saveButton.addActionListener(_ -> {
                 aircraftModel.setValueAt(nameField.getText(), selectedRow, 0);
                 aircraftModel.setValueAt(modelField.getText(), selectedRow, 1);
                 aircraftModel.setValueAt(yearField.getText(), selectedRow, 2);
@@ -1220,7 +1220,7 @@ public class AdminDashboard extends JFrame {
             });
             
             JButton cancelButton = new JButton("Cancel");
-            cancelButton.addActionListener(e -> dialog.dispose());
+            cancelButton.addActionListener(_ -> dialog.dispose());
             
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             buttonPanel.add(saveButton);
