@@ -1,26 +1,29 @@
+CREATE DATABASE IF NOT EXISTS flights;
+USE flights;
+
 -- Table: country
 CREATE TABLE country (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     name TEXT NOT NULL
 );
 
 -- Table: airline
 CREATE TABLE airline (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     name TEXT NOT NULL,
     code TEXT NOT NULL
 );
 
 -- Table: role
 CREATE TABLE role (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     role_name TEXT NOT NULL,
     description TEXT
 );
 
 -- Table: airport
 CREATE TABLE airport (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     country_id INTEGER NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
@@ -31,7 +34,7 @@ CREATE TABLE airport (
 
 -- Table: user
 CREATE TABLE user (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     username TEXT NOT NULL,
     email TEXT NOT NULL,
     phone TEXT,
@@ -45,7 +48,7 @@ CREATE TABLE user (
 
 -- Table: weeklySchedule
 CREATE TABLE weeklySchedule (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     dayOfWeek TEXT NOT NULL,
     departure_time TIME NOT NULL,
     customDate DATE
@@ -53,16 +56,16 @@ CREATE TABLE weeklySchedule (
 
 -- Table: aircraft
 CREATE TABLE aircraft (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     airline_id INTEGER NOT NULL,
-    modal TEXT NOT NULL,
+    model TEXT NOT NULL,
     manufacturing_year INTEGER,
     FOREIGN KEY (airline_id) REFERENCES airline(id)
 );
 
 -- Table: seat
 CREATE TABLE seat (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     aircraft_id INTEGER NOT NULL,
     class TEXT NOT NULL,
     FOREIGN KEY (aircraft_id) REFERENCES aircraft(id)
@@ -70,7 +73,7 @@ CREATE TABLE seat (
 
 -- Table: flight
 CREATE TABLE flight (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     arrival_airport_id INTEGER NOT NULL,
     departure_airport_id INTEGER NOT NULL,
     gate TEXT,
@@ -85,7 +88,7 @@ CREATE TABLE flight (
 
 -- Table: payment
 CREATE TABLE payment (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER NOT NULL,
     payment_amount DECIMAL NOT NULL,
     payment_state TEXT NOT NULL,
@@ -97,7 +100,7 @@ CREATE TABLE payment (
 
 -- Table: customSchedule
 CREATE TABLE customSchedule (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     flight_id INTEGER NOT NULL,
     departure_time TIME NOT NULL,
     customDate DATE,
@@ -106,7 +109,7 @@ CREATE TABLE customSchedule (
 
 -- Table: flightReservation
 CREATE TABLE flightReservation (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     flight_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     qr_code TEXT,
@@ -118,8 +121,8 @@ CREATE TABLE flightReservation (
 
 -- Table: passenger
 CREATE TABLE passenger (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER, -- Can be NULL
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    user_id INTEGER,
     name TEXT NOT NULL,
     passport TEXT,
     flightReservation_id INTEGER,
@@ -127,16 +130,16 @@ CREATE TABLE passenger (
     FOREIGN KEY (flightReservation_id) REFERENCES flightReservation(id)
 );
 
--- Junction Table: flight_payment (flight ↔ payment)
-CREATE TABLE flight_payment (
-    flight_id INTEGER,
+-- Junction Table: flight_payment
+CREATE TABLE peservation_payment (
+    flightReservation_id INTEGER,
     payment_id INTEGER,
     PRIMARY KEY (flight_id, payment_id),
-    FOREIGN KEY (flight_id) REFERENCES flight(id),
+    FOREIGN KEY (flight_id) REFERENCES flightReservation(id),
     FOREIGN KEY (payment_id) REFERENCES payment(id)
 );
 
--- Junction Table: passenger_seat (passenger ↔ seat)
+-- Junction Table: passenger_seat
 CREATE TABLE passenger_seat (
     passenger_id INTEGER,
     seat_id INTEGER,

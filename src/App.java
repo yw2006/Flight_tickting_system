@@ -1,7 +1,10 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.*;
+
+import util.DbConnection;
 
 public class App extends JFrame {
 
@@ -113,7 +116,9 @@ public class App extends JFrame {
         passwordField.setText("");
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new App().setVisible(true));
+    public static void main(String[] args) throws SQLException   {
+        SwingUtilities.invokeLater(() ->
+         new App().setVisible(true));
+        DbConnection.getInstance();
     }
 }
