@@ -9,7 +9,7 @@ import util.DbConnection;
 public class App extends JFrame {
 
     private JTextField nameField, emailField;
-    private JPasswordField passwordField;
+    private JPasswordField oldPasswordField, passwordField;
     private JTextArea historyArea;
 
     public App() {
@@ -18,13 +18,11 @@ public class App extends JFrame {
         setSize(600, 400);
         setLocationRelativeTo(null);
 
-       
         JTabbedPane tabbedPane = new JTabbedPane();
 
         JPanel editProfilePanel = createEditProfilePanel();
         tabbedPane.addTab("Edit Profile", editProfilePanel);
 
-        
         JPanel historyPanel = createHistoryPanel();
         tabbedPane.addTab("Show History", historyPanel);
 
@@ -34,14 +32,19 @@ public class App extends JFrame {
     private JPanel createEditProfilePanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10,10,10,10);
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         JLabel nameLabel = new JLabel("Name:");
         nameField = new JTextField(20);
+        nameField.setText("seif");
 
         JLabel emailLabel = new JLabel("Email:");
         emailField = new JTextField(20);
+        emailField.setText("seif@123");
+
+        JLabel oldPasswordLabel = new JLabel("Old Password:");
+        oldPasswordField = new JPasswordField(20);
 
         JLabel passwordLabel = new JLabel("New Password:");
         passwordField = new JPasswordField(20);
@@ -52,34 +55,51 @@ public class App extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String name = nameField.getText();
                 String email = emailField.getText();
-                String password = new String(passwordField.getPassword());
+                String oldPassword = new String(oldPasswordField.getPassword());
+                String newPassword = new String(passwordField.getPassword());
 
-                if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                if (name.isEmpty() || email.isEmpty() || oldPassword.isEmpty() || newPassword.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "All fields must be filled!", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    
+                    // Simple mock check — in real application, check against DB
+                    if (!oldPassword.equals("existingPassword")) {
+                        JOptionPane.showMessageDialog(null, "Old password is incorrect!", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
                     JOptionPane.showMessageDialog(null, "Profile Updated Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     clearFields();
                 }
             }
         });
 
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         panel.add(nameLabel, gbc);
         gbc.gridx = 1;
         panel.add(nameField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         panel.add(emailLabel, gbc);
         gbc.gridx = 1;
         panel.add(emailField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(oldPasswordLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(oldPasswordField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         panel.add(passwordLabel, gbc);
         gbc.gridx = 1;
         panel.add(passwordField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
         panel.add(updateButton, gbc);
 
         return panel;
@@ -113,6 +133,7 @@ public class App extends JFrame {
     private void clearFields() {
         nameField.setText("");
         emailField.setText("");
+        oldPasswordField.setText("");
         passwordField.setText("");
     }
 
