@@ -1,15 +1,17 @@
 package model;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JTextArea;
 import util.*;
+
 public class FlightReservation {
     private int id;
     private int flightId;
@@ -105,6 +107,36 @@ public class FlightReservation {
             stmt.setString(1, status.name());
             stmt.setInt(2, id);
             return stmt.executeUpdate() > 0;
+        }
+    }
+
+    public ArrayList<String> getHistoryFromDB() throws SQLException {
+        ArrayList<String> history = new ArrayList<>();
+        String sql = "SELECT * FROM flightReservation WHERE user_id = ?";
+        try (Connection conn = DbConnection.getInstance();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String record = String.format("Reservation ID: %d | Flight ID: %d | User ID: %d | QR Code: %s | Booking Date: %s | Status: %s",
+                        rs.getInt("id"),
+                        rs.getInt("flight_id"),
+                        rs.getInt("user_id"),
+                        rs.getString("qr_code") != null ? rs.getString("qr_code") : "N/A",
+                        rs.getDate("booking_date") != null ? rs.getDate("booking_date").toString() : "N/A",
+                        rs.getString("status") != null ? rs.getString("status") : "N/A");
+                    history.add(record);
+                }
+            }
+        }
+        return history;
+    }
+
+    public void refreshHistory(JTextArea historyArea) throws SQLException {
+        historyArea.setText("");
+        List<String> history = getHistoryFromDB();
+        for (String record : history) {
+            historyArea.append(record + "\n\n");
         }
     }
 

@@ -13,7 +13,7 @@ public class DbConnection {
     private void init() throws SQLException {
         final String DB_URL = "jdbc:mysql://localhost:3306/flights";
         final String USER = "root";
-        final String PASS = "1234";
+        final String PASS = "Sofa@2007";
 
         conn = DriverManager.getConnection(DB_URL, USER, PASS);
         System.out.println("Connected to database");
