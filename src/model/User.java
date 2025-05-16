@@ -83,32 +83,47 @@ public class User {
 }
 
 
-    public static User loadWithEmail(String email) throws SQLException {
-        String sql = "SELECT * FROM user WHERE email = ?";
-        try (Connection conn = DbConnection.getInstance();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+public static User loadWithEmail(String email) throws SQLException {
+    String sql = "SELECT * FROM user WHERE email = ?";
+    try (Connection conn = DbConnection.getInstance();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, email);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    User user = new User(
-                        rs.getString("username"),
-                        rs.getString("email"),
-                        rs.getString("phone"),
-                        rs.getString("password"),
-                        rs.getInt("age") == 0 ? null : rs.getInt("age"),
-                        Role.load(rs.getInt("role_id"))
-                    );
-                    user.setId(rs.getInt("id"));
-                    user.setCreatedAt(rs.getTimestamp("created_at"));
-                    user.setUpdatedAt(rs.getTimestamp("updated_at"));
-                    return user;
-                } else {
-                    throw new SQLException("User not found");
-                }
+        stmt.setString(1, email);
+
+        String username = null, emailValue = null, phone = null, password = null;
+        Integer age = null;
+        int roleId = 0, id = 0;
+        java.sql.Timestamp createdAt = null, updatedAt = null;
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                username = rs.getString("username");
+                emailValue = rs.getString("email");
+                phone = rs.getString("phone");
+                password = rs.getString("password");
+
+                int ageValue = rs.getInt("age");
+                age = (rs.wasNull() || ageValue == 0) ? null : ageValue;
+
+                roleId = rs.getInt("role_id");
+                id = rs.getInt("id");
+                createdAt = rs.getTimestamp("created_at");
+                updatedAt = rs.getTimestamp("updated_at");
+            } else {
+                throw new SQLException("User not found");
             }
         }
+
+        Role role = Role.load(roleId);
+
+        User user = new User(username, emailValue, phone, password, age, role);
+        user.setId(id);
+        user.setCreatedAt(createdAt);
+        user.setUpdatedAt(updatedAt);
+        return user;
     }
+}
+
 
     public void register() throws SQLException {
         save();
