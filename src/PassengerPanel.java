@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import model.*;
 
 public class PassengerPanel extends JPanel {
     private FlightBookingApp app;
@@ -14,14 +15,10 @@ public class PassengerPanel extends JPanel {
         setBackground(FlightBookingApp.ACCENT_COLOR);
         setLayout(new BorderLayout());
         
-        System.out.println("PassengerPanel initialized with " + app.getNumberOfPassengers() + " passengers"); // Debug log
-        
-        // Main content with padding
         JPanel contentPanel = new JPanel(new BorderLayout(0, 20));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
         contentPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
         
-        // Header
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         headerPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
         
@@ -35,18 +32,16 @@ public class PassengerPanel extends JPanel {
         backButton.setContentAreaFilled(false);
         backButton.setForeground(FlightBookingApp.PRIMARY_COLOR);
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        backButton.addActionListener(_ -> app.getCardLayout().show(app.getMainPanel(), "results"));
+        backButton.addActionListener(_ -> app.navigateTo("results"));
         
         headerPanel.add(backButton);
         headerPanel.add(Box.createRigidArea(new Dimension(20, 0)));
         headerPanel.add(headerLabel);
         
-        // Form panel
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
         
-        // Passenger count label
         JPanel countPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         countPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
         
@@ -54,7 +49,6 @@ public class PassengerPanel extends JPanel {
         countLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         countPanel.add(countLabel);
         
-        // Passenger details panel
         passengerDetailsPanel = new JPanel();
         passengerDetailsPanel.setLayout(new BoxLayout(passengerDetailsPanel, BoxLayout.Y_AXIS));
         passengerDetailsPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
@@ -63,7 +57,6 @@ public class PassengerPanel extends JPanel {
         passportFields = new ArrayList<>();
         updatePassengerFields(app.getNumberOfPassengers());
         
-        // Next button
         JButton nextButton = new JButton("Next");
         nextButton.setFont(new Font("Arial", Font.BOLD, 14));
         nextButton.setBackground(FlightBookingApp.PRIMARY_COLOR);
@@ -83,10 +76,13 @@ public class PassengerPanel extends JPanel {
                         "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                newPassengers.add(new Passenger(fullName, passportNumber));
+                Passenger passenger = new Passenger(fullName, passportNumber);
+                passenger.setUserId(app.getCurrentUser().getId());
+                newPassengers.add(passenger);
             }
             app.setPassengers(newPassengers);
-            app.getCardLayout().show(app.getMainPanel(), "seatSelection");
+            app.navigateTo("seatSelection");
+            new SeatSelectionPanel(app).refresh();
         });
         
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -106,13 +102,11 @@ public class PassengerPanel extends JPanel {
     }
     
     public void refresh() {
-        System.out.println("Refreshing PassengerPanel with " + app.getNumberOfPassengers() + " passengers"); // Debug log
         countLabel.setText("Passengers: " + app.getNumberOfPassengers());
         updatePassengerFields(app.getNumberOfPassengers());
     }
     
     private void updatePassengerFields(int totalPassengers) {
-        System.out.println("Updating fields for " + totalPassengers + " passengers"); // Debug log
         passengerDetailsPanel.removeAll();
         fullNameFields.clear();
         passportFields.clear();

@@ -46,22 +46,52 @@ public class Country {
             }
         }
     }
+    public static ArrayList<Country> loadAll() throws SQLException {
+        String sql = "SELECT * FROM country";
+        ArrayList<Country> countries = new ArrayList<>();
+        try (Connection conn = DbConnection.getInstance();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    int id = rs.getInt("id");
+                    Country country = new Country(name);
+                    country.setId(id);
+                    countries.add(country);
+                }
+                return countries;
+            }
+        }
+    }
 
     public List<Airport> getAirports() throws SQLException {
         if (airports.isEmpty()) {
+            List<Integer> airportIds = new ArrayList<>();
+    
             String sql = "SELECT id FROM airport WHERE country_id = ?";
             try (Connection conn = DbConnection.getInstance();
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
+    
                 stmt.setInt(1, id);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        airports.add(Airport.load(rs.getInt("id")));
+                        airportIds.add(rs.getInt("id")); // Just collect IDs for now
                     }
                 }
             }
+    
+            // After ResultSet and connection are closed, safely load the airports
+            for (int airportId : airportIds) {
+                Airport airport = Airport.load(airportId);
+                if (airport != null) {
+                    airports.add(airport);
+                }
+            }
         }
+    
         return airports;
     }
+    
 
     public void addAirport(Airport airport) throws SQLException {
         airport.setCountryId(id);
@@ -73,4 +103,8 @@ public class Country {
     public void setId(int id) { this.id = id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    @Override
+public String toString() {
+    return this.name;
+}
 }

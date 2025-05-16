@@ -69,7 +69,7 @@ class LoginPage extends JFrame {
                     if (user.getPassword().equals(password)) {
                         JOptionPane.showMessageDialog(this, "Login successful! Welcome, " + user.getUsername(), "Login Success", JOptionPane.INFORMATION_MESSAGE);
                         dispose();
-                        new FlightBookingApp().setVisible(true); 
+                        new FlightBookingApp(user).setVisible(true); 
                     } else {
                         JOptionPane.showMessageDialog(this, "Invalid password", "Login Error", JOptionPane.ERROR_MESSAGE);
                     }

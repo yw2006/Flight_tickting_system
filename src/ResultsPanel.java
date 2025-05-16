@@ -2,7 +2,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import model.*;
+import util.DbConnection;
 
 public class ResultsPanel extends JPanel {
     private FlightBookingApp app;
@@ -14,12 +19,10 @@ public class ResultsPanel extends JPanel {
         setBackground(FlightBookingApp.ACCENT_COLOR);
         setLayout(new BorderLayout());
         
-        // Main content panel with padding
         JPanel contentPanel = new JPanel(new BorderLayout(20, 20));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
         contentPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
         
-        // Route information panel
         JPanel routePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         routePanel.setBackground(FlightBookingApp.ACCENT_COLOR);
         
@@ -33,20 +36,17 @@ public class ResultsPanel extends JPanel {
         backButton.setContentAreaFilled(false);
         backButton.setForeground(FlightBookingApp.PRIMARY_COLOR);
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        backButton.addActionListener(_ -> app.getCardLayout().show(app.getMainPanel(), "search"));
+        backButton.addActionListener(_ -> app.navigateTo("search"));
         
         routePanel.add(backButton);
         routePanel.add(Box.createRigidArea(new Dimension(20, 0)));
         routePanel.add(routeLabel);
         
-        // Results area - split into two panels
         JPanel resultsAreaPanel = new JPanel(new BorderLayout(20, 0));
         resultsAreaPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
         
-        // Filters panel (right side)
         JPanel filtersPanel = createFiltersPanel();
         
-        // Flights list panel (left/center)
         flightsListPanel = new JPanel();
         flightsListPanel.setLayout(new BoxLayout(flightsListPanel, BoxLayout.Y_AXIS));
         flightsListPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
@@ -58,28 +58,54 @@ public class ResultsPanel extends JPanel {
         resultsAreaPanel.add(scrollPane, BorderLayout.CENTER);
         resultsAreaPanel.add(filtersPanel, BorderLayout.EAST);
         
-        // Add everything to content panel
         contentPanel.add(routePanel, BorderLayout.NORTH);
         contentPanel.add(resultsAreaPanel, BorderLayout.CENTER);
         
-        // Add content panel to results panel
         add(contentPanel, BorderLayout.CENTER);
     }
     
     public void refresh(SearchPanel searchPanel) {
-        // Clear existing flights
         flightsListPanel.removeAll();
         
-        // Update route label and add example flights
         String from = searchPanel.getFrom();
         String to = searchPanel.getTo();
         updateRouteLabel(from, to, searchPanel.getDepartDate());
-        addFlightCard("Alitalia", from, to, "7:30 AM", "9:55 AM", "MXP", "MAD", "2h 25m", "Nonstop", "$200");
-        addFlightCard("Alitalia", from, to, "8:30 PM", "10:25 PM", "MXP", "MAD", "2h 25m", "Nonstop", "$234");
         
-        // Refresh UI
+        try {
+            List<Flight> flights = searchFlights(app.getDepartureAirport(), app.getArrivalAirport(), app.getSelectedSchedule());
+            for (Flight flight : flights) {
+                addFlightCard(flight);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error loading flights: " + e.getMessage(), 
+                "Database Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+        
         flightsListPanel.revalidate();
         flightsListPanel.repaint();
+    }
+    
+    private List<Flight> searchFlights(Airport departure, Airport arrival, WeeklySchedule schedule) throws SQLException {
+        List<Flight> flights = new ArrayList<>();
+        String sql = "SELECT f.id FROM flight f " +
+                     "JOIN weeklySchedule ws ON f.flight_schedule_id = ws.id " +
+                     "WHERE f.departure_airport_id = ? AND f.arrival_airport_id = ? " +
+                     "AND (ws.customDate = ? OR ws.dayOfWeek = ?)";
+        try (Connection conn = DbConnection.getInstance();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, departure.getId());
+            stmt.setInt(2, arrival.getId());
+            stmt.setDate(3, schedule.getCustomDate());
+            stmt.setString(4, schedule.getDayOfWeek().name());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    flights.add(Flight.load(rs.getInt("id")));
+                }
+            }
+        }
+        return flights;
     }
     
     private JPanel createFiltersPanel() {
@@ -89,39 +115,46 @@ public class ResultsPanel extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         panel.setPreferredSize(new Dimension(250, 0));
         
-        // Sort by dropdown
         JPanel sortPanel = new JPanel(new BorderLayout(0, 10));
         sortPanel.setBackground(FlightBookingApp.WHITE);
         
         JLabel sortLabel = new JLabel("Sort by:");
         sortLabel.setFont(new Font("Arial", Font.BOLD, 14));
         
-        String[] sortOptions = {"Lowest Price", "Earliest Departure", "Latest Departure", "Shortest Duration"};
+        String[] sortOptions = {"Lowest Price", "Earliest Departure", "Shortest Duration"};
         JComboBox<String> sortByComboBox = new JComboBox<>(sortOptions);
         sortByComboBox.setFont(new Font("Arial", Font.PLAIN, 12));
         
         sortPanel.add(sortLabel, BorderLayout.NORTH);
         sortPanel.add(sortByComboBox, BorderLayout.CENTER);
         
-        // Arrival time filter
-        JPanel arrivalTimePanel = createFilterSection("Arrival Time", new String[]{"5:00 AM - 11:59 AM", "12:00 PM - 5:59 PM"});
-        
-        // Stops filter
-        JPanel stopsPanel = createFilterSection("Stops", new String[]{"Nonstop", "1 Stop", "2+ Stops"});
-        
-        // Airlines filter
-        JPanel airlinesPanel = createFilterSection("Airlines Included", 
-            new String[]{"Alitalia", "Lufthansa", "Air France", "Brussels Airlines", "Air Italy", "Siberia"});
+        JPanel airlinesPanel = createFilterSection("Airlines Included", getAirlines());
         
         panel.add(sortPanel);
-        panel.add(Box.createRigidArea(new Dimension(0, 20)));
-        panel.add(arrivalTimePanel);
-        panel.add(Box.createRigidArea(new Dimension(0, 20)));
-        panel.add(stopsPanel);
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
         panel.add(airlinesPanel);
         
         return panel;
+    }
+    
+    private String[] getAirlines() {
+        List<String> airlines = new ArrayList<>();
+        try {
+            String sql = "SELECT name FROM airline";
+            try (Connection conn = DbConnection.getInstance();
+                 PreparedStatement stmt = conn.prepareStatement(sql);
+                 ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    airlines.add(rs.getString("name"));
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error loading airlines: " + e.getMessage(), 
+                "Database Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+        return airlines.toArray(new String[0]);
     }
     
     private JPanel createFilterSection(String title, String[] options) {
@@ -150,15 +183,9 @@ public class ResultsPanel extends JPanel {
             JLabel optionLabel = new JLabel(option);
             optionLabel.setFont(new Font("Arial", Font.PLAIN, 12));
             
-            JLabel priceLabel = new JLabel("$230");
-            priceLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-            priceLabel.setForeground(Color.GRAY);
-            
             group.add(radioBtn);
-            
             optionPanel.add(radioBtn, BorderLayout.WEST);
             optionPanel.add(optionLabel, BorderLayout.CENTER);
-            optionPanel.add(priceLabel, BorderLayout.EAST);
             
             panel.add(optionPanel);
             panel.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -167,7 +194,7 @@ public class ResultsPanel extends JPanel {
         return panel;
     }
     
-    private void updateRouteLabel(String from, String to, LocalDate departDate) {
+    private void updateRouteLabel(String from, String to, java.util.Date departDate) {
         String routeText = from + " - " + to + ", " + app.getNumberOfPassengers() + " passenger" + 
                           (app.getNumberOfPassengers() > 1 ? "s" : "");
         if (departDate != null) {
@@ -176,8 +203,12 @@ public class ResultsPanel extends JPanel {
         routeLabel.setText(routeText);
     }
     
-    private void addFlightCard(String airline, String from, String to, String depTime, String arrTime, 
-                              String depAirport, String arrAirport, String duration, String stops, String price) {
+    private void addFlightCard(Flight flight) throws SQLException {
+        Airport depAirport = Airport.load(flight.getDepartureAirportId());
+        Airport arrAirport = Airport.load(flight.getArrivalAirportId());
+        Aircraft aircraft = Aircraft.load(flight.getAircraftId());
+        WeeklySchedule schedule = WeeklySchedule.load(flight.getFlightScheduleId());
+        Airline airline = Airline.load(aircraft.getAirlineId());
         
         JPanel flightCard = new JPanel(new BorderLayout(10, 0));
         flightCard.setBackground(FlightBookingApp.WHITE);
@@ -206,16 +237,18 @@ public class ResultsPanel extends JPanel {
         JPanel timelinePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         timelinePanel.setBackground(FlightBookingApp.WHITE);
         
-        JLabel depTimeLabel = new JLabel(depTime);
+        JLabel depTimeLabel = new JLabel(schedule.getDepartureTime().toString());
         depTimeLabel.setFont(new Font("Arial", Font.BOLD, 16));
         
         JLabel connectorLabel = new JLabel(" ─────────── ");
         
         JLabel airlineIconLabel = new JLabel();
-        airlineIconLabel.setIcon(createAirlineIcon(airline));
+        airlineIconLabel.setIcon(createAirlineIcon(airline.getName()));
         
         JLabel connectorLabel2 = new JLabel(" ─────────── ");
         
+        // Calculate arrival time (departure + duration)
+        String arrTime = calculateArrivalTime(schedule.getDepartureTime(), flight.getDuration());
         JLabel arrTimeLabel = new JLabel(arrTime);
         arrTimeLabel.setFont(new Font("Arial", Font.BOLD, 16));
         
@@ -228,18 +261,19 @@ public class ResultsPanel extends JPanel {
         JPanel airportsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         airportsPanel.setBackground(FlightBookingApp.WHITE);
         
-        JLabel depAirportLabel = new JLabel("Airport: " + depAirport);
+        JLabel depAirportLabel = new JLabel("Airport: " + depAirport.getCode());
         depAirportLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         
         JLabel spacerLabel = new JLabel("                                             ");
         
-        JLabel durationLabel = new JLabel(duration + " (" + stops + ")");
+        String durationText = flight.getDuration() != null ? flight.getDuration() / 60 + "h " + flight.getDuration() % 60 + "m" : "N/A";
+        JLabel durationLabel = new JLabel(durationText + " (Nonstop)");
         durationLabel.setFont(new Font("Arial", Font.ITALIC, 12));
         durationLabel.setForeground(Color.GRAY);
         
         JLabel spacerLabel2 = new JLabel("                    ");
         
-        JLabel arrAirportLabel = new JLabel("Airport: " + arrAirport);
+        JLabel arrAirportLabel = new JLabel("Airport: " + arrAirport.getCode());
         arrAirportLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         
         airportsPanel.add(depAirportLabel);
@@ -260,10 +294,10 @@ public class ResultsPanel extends JPanel {
         JPanel priceInfoPanel = new JPanel(new BorderLayout());
         priceInfoPanel.setBackground(FlightBookingApp.WHITE);
         
-        JLabel priceValueLabel = new JLabel("Price: " + price);
+        // Placeholder price calculation
+        double price = calculatePrice(flight, app.getSelectedSchedule().getCustomDate());
+        JLabel priceValueLabel = new JLabel("Price: $" + String.format("%.2f", price));
         priceValueLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        
-
         
         priceInfoPanel.add(priceValueLabel, BorderLayout.NORTH);
         
@@ -275,8 +309,9 @@ public class ResultsPanel extends JPanel {
         bookButton.setBorderPainted(false);
         bookButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         bookButton.addActionListener(_ -> {
-            app.setSelectedFlight(new Flight(airline, from, to, depTime, arrTime, depAirport, arrAirport, duration, stops, price));
-            app.getCardLayout().show(app.getMainPanel(), "passengers");
+            app.setSelectedFlight(flight);
+            app.setSelectedAircraft(aircraft);
+            app.navigateTo("passengers");
         });
         
         JPanel detailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -293,14 +328,14 @@ public class ResultsPanel extends JPanel {
                 JOptionPane.showMessageDialog(
                     app,
                     "Flight Details\n\n" +
-                    "Airline: " + airline + "\n" +
-                    "From: " + from + " (" + depAirport + ")\n" +
-                    "To: " + to + " (" + arrAirport + ")\n" +
-                    "Departure: " + depTime + "\n" +
+                    "Airline: " + airline.getName() + "\n" +
+                    "From: " + depAirport.getName() + " (" + depAirport.getCode() + ")\n" +
+                    "To: " + arrAirport.getName() + " (" + arrAirport.getCode() + ")\n" +
+                    "Departure: " + schedule.getDepartureTime() + "\n" +
                     "Arrival: " + arrTime + "\n" +
-                    "Duration: " + duration + "\n" +
-                    "Type: " + stops + "\n" +
-                    "Price: " + price,
+                    "Duration: " + durationText + "\n" +
+                    "Type: Nonstop\n" +
+                    "Price: $" + String.format("%.2f", price),
                     "Flight Details",
                     JOptionPane.INFORMATION_MESSAGE
                 );
@@ -334,7 +369,6 @@ public class ResultsPanel extends JPanel {
         cardContainer.setMaximumSize(new Dimension(650, 140));
         
         cardContainer.add(flightCard);
-        
         flightsListPanel.add(cardContainer);
     }
     
@@ -362,5 +396,22 @@ public class ResultsPanel extends JPanel {
         g2d.dispose();
         
         return new ImageIcon(img);
+    }
+    
+    private String calculateArrivalTime(Time departureTime, Integer duration) {
+        if (duration == null) return "N/A";
+        long depMillis = departureTime.getTime();
+        long arrMillis = depMillis + (duration * 60 * 1000);
+        return new Time(arrMillis).toString();
+    }
+    
+    private double calculatePrice(Flight flight, Date date) {
+        // Placeholder: Base price + premium for date proximity
+        double basePrice = 200.0;
+        if (date != null) {
+            long daysUntilFlight = (date.getTime() - System.currentTimeMillis()) / (1000 * 60 * 60 * 24);
+            if (daysUntilFlight < 7) basePrice *= 1.5;
+        }
+        return basePrice * app.getNumberOfPassengers();
     }
 }

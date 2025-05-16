@@ -129,4 +129,8 @@ public class Airport {
     public void setAddress(String address) { this.address = address; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    @Override
+    public String toString() {
+        return name;
+    }
 }
