@@ -73,16 +73,16 @@ INSERT INTO role (role_name, description) VALUES
 -- Seed user table
 -- Users with BCrypt-hashed passwords and various roles
 INSERT INTO user (username, email, phone, password, created_at, updated_at, age, role_id) VALUES
-('admin', 'admin@airport.com', '+1-555-123-4567', '$2a$12$J8Zt1Z5g5QH0UEX9jO.PY.XGNMbGLOEIBnW9UGVDQ8rvsKo2LtmCu', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 35, 1),
-('john_doe', 'john.doe@example.com', '+1-555-234-5678', '$2a$12$yTJOKzuPTrD7F6N7.FVXPOr5ywb8hWjYzNzeSJ5m0vdUdYwDVNy1G', '2023-01-02 10:30:00', '2023-04-12 14:45:00', 28, 2),
-('jane_smith', 'jane.smith@example.com', '+1-555-345-6789', '$2a$12$LmxAlfVFNx0Zs1XH4Vwz5eSmYB5tGtxs0SY9ZyTZ6UGS3GzJlVNLG', '2023-01-03 14:15:00', '2023-05-20 09:30:00', 34, 2),
-('airline_staff1', 'staff1@airline.com', '+1-555-456-7890', '$2a$12$8nEwG6xH2B7Yt1hfTY7cXuWvWY9KgQhIfgaS.jq0OXqNy5Bx1VTe2', '2023-01-04 09:00:00', '2023-01-04 09:00:00', 42, 3),
-('airport_staff1', 'staff1@airport.com', '+1-555-567-8901', '$2a$12$l1TlOFIffXPBVdX4uLJQ5.FYEDTJVGJZVLw3KmTZjg9nGJjzfJEbS', '2023-01-05 11:20:00', '2023-03-15 16:30:00', 39, 4),
-('guest_user', 'guest@example.com', NULL, '$2a$12$H2nMEEzD0X5TpFmk5X59n.aCrU3fXWwcOg2QUx5kF9hKpP5UXEqBm', '2023-01-06 16:45:00', '2023-01-06 16:45:00', 25, 5),
-('emma_wilson', 'emma.wilson@example.com', '+1-555-678-9012', '$2a$12$iN6SbJ1SyNQUJDSN3xmTn.dv3JOBbIVwk1UXbN2C3qUH2p8nYRpiq', '2023-01-07 13:10:00', '2023-06-10 10:15:00', 31, 2),
-('michael_brown', 'michael.brown@example.com', '+1-555-789-0123', '$2a$12$KmM4vySyL8KxfHQ9F6WZYeHvW6YaPAyGj6r5UY2YKPSK2lmS2SrAq', '2023-01-08 08:30:00', '2023-02-18 12:40:00', 45, 2),
-('sarah_johnson', 'sarah.johnson@example.com', '+1-555-890-1234', '$2a$12$JNq3CPKD8PyS0k2Cv7cSWeKhRUfljTNzRZQnVlABHoVHtE4oeEVli', '2023-01-09 15:20:00', '2023-07-22 14:30:00', 29, 2),
-('david_lee', 'david.lee@example.com', '+1-555-901-2345', '$2a$12$tqQGAOXs8TnO23AYz3gDn.qP3hNWQKFDwpWz6CJxg2QlQpeWMexgC', '2023-01-10 12:00:00', '2023-05-05 11:10:00', 37, 2);
+('admin', 'admin@airport.com', '+1-555-123-4567', '12345678', '2023-01-01 00:00:00', '2023-01-01 00:00:00', 35, 1),
+('john_doe', 'john.doe@example.com', '+1-555-234-5678', '12345678', '2023-01-02 10:30:00', '2023-04-12 14:45:00', 28, 2),
+('jane_smith', 'jane.smith@example.com', '+1-555-345-6789', '12345678', '2023-01-03 14:15:00', '2023-05-20 09:30:00', 34, 2),
+('airline_staff1', 'staff1@airline.com', '+1-555-456-7890', '12345678', '2023-01-04 09:00:00', '2023-01-04 09:00:00', 42, 3),
+('airport_staff1', 'staff1@airport.com', '+1-555-567-8901', '12345678', '2023-01-05 11:20:00', '2023-03-15 16:30:00', 39, 4),
+('guest_user', 'guest@example.com', NULL, '12345678', '2023-01-06 16:45:00', '2023-01-06 16:45:00', 25, 5),
+('emma_wilson', 'emma.wilson@example.com', '+1-555-678-9012', '12345678', '2023-01-07 13:10:00', '2023-06-10 10:15:00', 31, 2),
+('michael_brown', 'michael.brown@example.com', '+1-555-789-0123', '12345678', '2023-01-08 08:30:00', '2023-02-18 12:40:00', 45, 2),
+('sarah_johnson', 'sarah.johnson@example.com', '+1-555-890-1234', '12345678', '2023-01-09 15:20:00', '2023-07-22 14:30:00', 29, 2),
+('david_lee', 'david.lee@example.com', '+1-555-901-2345', '12345678', '2023-01-10 12:00:00', '2023-05-05 11:10:00', 37, 2);
 
 -- Seed passenger table
 -- Passengers, some linked to users, initially with NULL flightReservation_id
