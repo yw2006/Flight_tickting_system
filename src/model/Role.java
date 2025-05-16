@@ -3,6 +3,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import util.*;
 public class Role {
     private int id;
@@ -44,6 +47,30 @@ public class Role {
             }
         }
     }
+public static ArrayList<Role> loadAll() throws SQLException {
+    String sql = "SELECT * FROM role";
+    ArrayList<Role> roles = new ArrayList<>();
+    
+    try (Connection conn = DbConnection.getInstance();
+         PreparedStatement stmt = conn.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
+        
+        while (rs.next()) {
+            Role role = new Role(
+                rs.getString("role_name"), 
+                rs.getString("description")
+            );
+            role.setId(rs.getInt("id"));
+            roles.add(role);
+        }
+        
+        if (roles.isEmpty()) {
+            throw new SQLException("No roles found in database");
+        }
+        
+        return roles;
+    }
+}
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -51,4 +78,8 @@ public class Role {
     public void setRoleName(String roleName) { this.roleName = roleName; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+@Override
+public String toString() {
+    return roleName; // Assuming "roleName" is the property you want to display in the combo box
+}
 }

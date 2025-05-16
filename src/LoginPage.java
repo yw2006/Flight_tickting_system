@@ -1,8 +1,11 @@
 import javax.swing.*;
+
+import model.User;
+
 import java.awt.*;
 import java.awt.event.*;
 class LoginPage extends JFrame {
-    private JTextField usernameField;
+    private JTextField emailField;
     private JPasswordField passwordField;
 
     public LoginPage() {
@@ -27,15 +30,15 @@ class LoginPage extends JFrame {
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
 
-        // Username
-        JPanel usernamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        usernamePanel.setBackground(FlightBookingApp.ACCENT_COLOR);
-        JLabel usernameLabel = new JLabel("Username:");
-        usernameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        usernameField = new JTextField(15);
-        usernameField.setFont(new Font("Arial", Font.PLAIN, 14));
-        usernamePanel.add(usernameLabel);
-        usernamePanel.add(usernameField);
+        // Email
+        JPanel emailPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        emailPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        emailField = new JTextField(15);
+        emailField.setFont(new Font("Arial", Font.PLAIN, 14));
+        emailPanel.add(emailLabel);
+        emailPanel.add(emailField);
 
         // Password
         JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -56,14 +59,24 @@ class LoginPage extends JFrame {
         loginButton.setForeground(FlightBookingApp.WHITE);
         loginButton.setFocusPainted(false);
         loginButton.addActionListener(_ -> {
-            String username = usernameField.getText().trim();
+            String email = emailField.getText().trim();
             String password = new String(passwordField.getPassword());
-            if (username.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter both username and password", "Login Error", JOptionPane.ERROR_MESSAGE);
+            if (email.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter both email and password", "Login Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Login successful! Welcome, " + username, "Login Success", JOptionPane.INFORMATION_MESSAGE);
-                dispose();
-                new FlightBookingApp().setVisible(true);
+                try {
+                    User user = User.loadWithEmail(email);
+                    if (user.getPassword().equals(password)) {
+                        JOptionPane.showMessageDialog(this, "Login successful! Welcome, " + user.getUsername(), "Login Success", JOptionPane.INFORMATION_MESSAGE);
+                        dispose();
+                        new FlightBookingApp().setVisible(true); 
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Invalid password", "Login Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(this, e.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -96,7 +109,7 @@ class LoginPage extends JFrame {
         forgotPanel.add(forgotPasswordLabel);
 
         formPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        formPanel.add(usernamePanel);
+        formPanel.add(emailPanel);
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         formPanel.add(passwordPanel);
         formPanel.add(Box.createRigidArea(new Dimension(0, 20)));

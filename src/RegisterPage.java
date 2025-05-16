@@ -1,13 +1,19 @@
 import javax.swing.*;
+import model.Role;
+import model.User;
 import java.awt.*;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
 class RegisterPage extends JFrame {
-    private JTextField fullNameField, emailField, usernameField, phoneField;
+    private JTextField usernameField, emailField, phoneField, ageField;
     private JPasswordField passwordField, confirmPasswordField;
-    private JComboBox<String> countryComboBox;
+    private JComboBox<Role> roleComboBox;
+    private ArrayList<Role> roles;
 
     public RegisterPage() {
         setTitle("SkyJourney Airlines - Registration");
-        setSize(500, 450);
+        setSize(500, 500); // Made taller to accommodate the new age field
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -28,21 +34,37 @@ class RegisterPage extends JFrame {
         formPanel.setBackground(FlightBookingApp.ACCENT_COLOR);
 
         // Fields
-        formPanel.add(createFieldPanel("Full Name:", fullNameField = new JTextField(20)));
+        formPanel.add(createFieldPanel("Username:", usernameField = new JTextField(20)));
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         formPanel.add(createFieldPanel("Email:", emailField = new JTextField(20)));
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        formPanel.add(createFieldPanel("Username:", usernameField = new JTextField(20)));
+        formPanel.add(createFieldPanel("Phone:", phoneField = new JTextField(20)));
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         formPanel.add(createFieldPanel("Password:", passwordField = new JPasswordField(20)));
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         formPanel.add(createFieldPanel("Confirm Password:", confirmPasswordField = new JPasswordField(20)));
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        formPanel.add(createFieldPanel("Phone Number:", phoneField = new JTextField(20)));
+        formPanel.add(createFieldPanel("Age:", ageField = new JTextField(20)));
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        String[] countries = {"Select Country", "United States", "Canada", "United Kingdom", "Australia", "India", "China", "Japan", "Germany", "France", "Other"};
-        countryComboBox = new JComboBox<>(countries);
-        formPanel.add(createFieldPanel("Country:", countryComboBox));
+        
+        try {
+            roles = Role.loadAll();
+            DefaultComboBoxModel<Role> roleModel = new DefaultComboBoxModel<>();
+            for (Role role : roles) {
+                roleModel.addElement(role);
+            }
+            
+            roleComboBox = new JComboBox<>(roleModel);
+            formPanel.add(createFieldPanel("Role:", roleComboBox));
+            
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, 
+                                        "Error loading roles: " + e.getMessage(), 
+                                        "Database Error", 
+                                        JOptionPane.ERROR_MESSAGE);
+            roleComboBox = new JComboBox<>(new DefaultComboBoxModel<>());
+            formPanel.add(createFieldPanel("Role:", roleComboBox));
+        }
 
         // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
@@ -54,9 +76,7 @@ class RegisterPage extends JFrame {
         registerButton.setFocusPainted(false);
         registerButton.addActionListener(_ -> {
             if (validateRegistration()) {
-                JOptionPane.showMessageDialog(this, "Registration successful! You can now login.", "Registration Success", JOptionPane.INFORMATION_MESSAGE);
-                dispose();
-                new LoginPage();
+                registerUser();
             }
         });
 
@@ -96,24 +116,24 @@ class RegisterPage extends JFrame {
     }
 
     private boolean validateRegistration() {
-        String fullName = fullNameField.getText().trim();
-        String email = emailField.getText().trim();
         String username = usernameField.getText().trim();
+        String email = emailField.getText().trim();
+        String phone = phoneField.getText().trim();
         String password = new String(passwordField.getPassword());
         String confirmPassword = new String(confirmPasswordField.getPassword());
-        String phone = phoneField.getText().trim();
-        String country = countryComboBox.getSelectedItem().toString();
-
-        if (fullName.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter your full name", "Registration Error", JOptionPane.ERROR_MESSAGE);
+        String ageStr = ageField.getText().trim();
+        
+        // Basic validation
+        if (username.isEmpty() || username.length() < 4) {
+            JOptionPane.showMessageDialog(this, "Username must be at least 4 characters", "Registration Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         if (email.isEmpty() || !email.contains("@") || !email.contains(".")) {
             JOptionPane.showMessageDialog(this, "Please enter a valid email address", "Registration Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-        if (username.isEmpty() || username.length() < 4) {
-            JOptionPane.showMessageDialog(this, "Username must be at least 4 characters", "Registration Error", JOptionPane.ERROR_MESSAGE);
+        if (phone.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter your phone number", "Registration Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         if (password.isEmpty() || password.length() < 6) {
@@ -124,16 +144,63 @@ class RegisterPage extends JFrame {
             JOptionPane.showMessageDialog(this, "Passwords do not match", "Registration Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-        if (phone.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter your phone number", "Registration Error", JOptionPane.ERROR_MESSAGE);
+        if (ageStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter your age", "Registration Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-        if (country.equals("Select Country")) {
-            JOptionPane.showMessageDialog(this, "Please select your country", "Registration Error", JOptionPane.ERROR_MESSAGE);
+        
+        // Validate age is a number
+        try {
+            Integer.parseInt(ageStr);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Age must be a number", "Registration Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
+        
+        if (roleComboBox.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Please select a role", "Registration Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
         return true;
     }
+    
+    private void registerUser() {
+        try {
+            String username = usernameField.getText().trim();
+            String email = emailField.getText().trim();
+            String phone = phoneField.getText().trim();
+            String password = new String(passwordField.getPassword());
+            int age = Integer.parseInt(ageField.getText().trim());
+            Role selectedRole = (Role) roleComboBox.getSelectedItem();
+            
+            // Create the user object
+            User user = new User(username, email, phone, password, age, selectedRole);
+            
+            // Save to database
+            user.register();
+            
+            JOptionPane.showMessageDialog(this, 
+                                         "Registration successful! You can now login.", 
+                                         "Registration Success", 
+                                         JOptionPane.INFORMATION_MESSAGE);
+            
+            // Return to login page
+            dispose();
+            new LoginPage();
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                                         "Error registering user: " + e.getMessage(), 
+                                         "Registration Error", 
+                                         JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                                         "An unexpected error occurred: " + e.getMessage(), 
+                                         "Error", 
+                                         JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }
-
-

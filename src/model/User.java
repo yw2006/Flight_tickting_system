@@ -51,7 +51,7 @@ public class User {
         }
     }
 
-    public static User load(int id) throws SQLException {
+    public static User loadWithId(int id) throws SQLException {
         String sql = "SELECT * FROM user WHERE id = ?";
         try (Connection conn = DbConnection.getInstance();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -75,17 +75,37 @@ public class User {
             }
         }
     }
-
-    public void login() throws SQLException {
-        String sql = "SELECT * FROM user WHERE email = ? AND password = ?";
+    public static User loadWithEmail(String email) throws SQLException {
+        String sql = "SELECT * FROM user WHERE email = ?";
         try (Connection conn = DbConnection.getInstance();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, email);
-            stmt.setString(2, password);
             try (ResultSet rs = stmt.executeQuery()) {
-                if (!rs.next()) {
-                    throw new SQLException("Invalid email or password");
+                if (rs.next()) {
+                    int userId = rs.getInt("id");
+                    String username = rs.getString("username");
+                    String rsEmail = rs.getString("email");
+                    String phone = rs.getString("phone");
+                    String password = rs.getString("password");
+                    int age = rs.getInt("age");
+                    int roleId = rs.getInt("role_id");
+                    Timestamp createdAt = rs.getTimestamp("created_at");
+                    Timestamp updatedAt = rs.getTimestamp("updated_at");
+                    
+                    User user = new User(
+                        username,
+                        rsEmail,
+                        phone,
+                        password,
+                        age,
+                        Role.load(roleId) 
+                    );
+                    user.setId(userId);
+                    user.setCreatedAt(createdAt);
+                    user.setUpdatedAt(updatedAt);
+                    return user;
                 }
+                throw new SQLException("User not found");
             }
         }
     }
