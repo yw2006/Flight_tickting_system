@@ -58,7 +58,7 @@ class LoginPage extends JFrame {
         loginButton.setBackground(FlightBookingApp.PRIMARY_COLOR);
         loginButton.setForeground(FlightBookingApp.WHITE);
         loginButton.setFocusPainted(false);
-        loginButton.addActionListener(_ -> {
+        loginButton.addActionListener(e -> {
             String email = emailField.getText().trim();
             String password = new String(passwordField.getPassword());
             if (email.isEmpty() || password.isEmpty()) {
@@ -73,9 +73,9 @@ class LoginPage extends JFrame {
                     } else {
                         JOptionPane.showMessageDialog(this, "Invalid password", "Login Error", JOptionPane.ERROR_MESSAGE);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(this, e.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });

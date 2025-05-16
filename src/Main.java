@@ -1,8 +1,5 @@
 
 import javax.swing.*;
-import model.User;
-import model.Role;
-
 /**
  * Entry point for the Flight Booking System
  */
